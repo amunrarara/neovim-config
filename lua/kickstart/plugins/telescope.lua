@@ -75,10 +75,10 @@ return {
 
       -- See `:help telescope.builtin`
       local builtin = require 'telescope.builtin'
-      vim.keymap.set('n', '<leader>ff', builtin.find_files, { desc = '[F]ind [F]iles' })
-      vim.keymap.set('n', '<leader>fr', builtin.oldfiles, { desc = '[F]ind [R]ecent Files' })
       vim.keymap.set('n', '<leader>fb', '<cmd>Telescope file_browser<CR>', { desc = 'Open [F]ile [B]rowser' })
+      vim.keymap.set('n', '<leader>sf', builtin.find_files, { desc = '[S]earch [F]iles' })
       vim.keymap.set('n', '<leader>sh', builtin.help_tags, { desc = '[S]earch [H]elp' })
+      vim.keymap.set('n', '<leader>sr', builtin.oldfiles, { desc = '[S]earch [R]ecentFiles' })
       vim.keymap.set('n', '<leader>sk', builtin.keymaps, { desc = '[S]earch [K]eymaps' })
       vim.keymap.set('n', '<leader>ss', builtin.builtin, { desc = '[S]earch [S]elect Telescope' })
       vim.keymap.set('n', '<leader>sw', builtin.grep_string, { desc = '[S]earch current [W]ord' })
@@ -88,9 +88,32 @@ return {
       vim.keymap.set('n', '<leader>s.', builtin.oldfiles, { desc = '[S]earch Recent Files ("." for repeat)' })
       vim.keymap.set('n', '<leader><leader>', builtin.buffers, { desc = '[ ] Find existing buffers' })
 
+      -- Save As
+      local fb = require('telescope').extensions.file_browser
+      local actions = require 'telescope.actions'
+      local action_state = require 'telescope.actions.state'
+
+      vim.keymap.set('n', '<leader>fs', function()
+        fb.file_browser {
+          prompt_title = 'Save File As',
+          cwd = vim.fn.expand '%:p:h', -- Start in the current file's directory
+          attach_mappings = function(prompt_bufnr, map)
+            map('i', '<CR>', function()
+              local selected = action_state.get_current_line()
+              if selected and selected ~= '' then
+                actions.close(prompt_bufnr) -- Close Telescope first
+                vim.schedule(function() -- Run saveas after Telescope closes
+                  vim.cmd('saveas ' .. vim.fn.fnameescape(selected))
+                end)
+              end
+            end)
+            return true
+          end,
+        }
+      end, { desc = 'Save As (Telescope File Picker)' }) -- < Save As
       -- Slightly advanced example of overriding default behavior and theme
       vim.keymap.set('n', '<leader>/', function()
-        -- You can pass additional configuration to Telescope to change the theme, layout, etc.
+        -- You can pass additional configuration to Telescope to change the theme, layout etc.
         builtin.current_buffer_fuzzy_find(require('telescope.themes').get_dropdown {
           winblend = 10,
           previewer = false,

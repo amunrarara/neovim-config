@@ -34,7 +34,59 @@ vim.keymap.set('n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right win
 vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
 vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
 
--- [[ Basic Autocommands ]]
+-- Window Management
+vim.keymap.set('n', '<leader>ws', ':split<CR>', { desc = 'Split Window Horizontally' })
+vim.keymap.set('n', '<leader>wv', ':vsplit<CR>', { desc = 'Split Window Vertically' })
+vim.keymap.set('n', '<leader>wk', ':close<CR>', { desc = 'Close Current Window' })
+vim.keymap.set('n', '<leader>wo', ':only<CR>', { desc = 'Close All Other Windows' })
+
+-- Resize windows
+vim.keymap.set('n', '<leader>w=', '<C-w>=', { desc = 'Equalize Window Sizes' })
+vim.keymap.set('n', '<leader>w]', ':resize +5<CR>', { desc = 'Increase Window Height' })
+vim.keymap.set('n', '<leader>w[', ':resize -5<CR>', { desc = 'Decrease Window Height' })
+vim.keymap.set('n', '<leader>w>', ':resize +20<CR>', { desc = 'Increase Window Width' })
+vim.keymap.set('n', '<leader>w<', ':resize -20<CR>', { desc = 'Decrease Window Width' })
+
+-- Swap windows
+vim.keymap.set('n', '<leader>wH', '<C-w>H', { desc = 'Move Window to Left' })
+vim.keymap.set('n', '<leader>wJ', '<C-w>J', { desc = 'Move Window to Bottom' })
+vim.keymap.set('n', '<leader>wK', '<C-w>K', { desc = 'Move Window to Top' })
+vim.keymap.set('n', '<leader>wL', '<C-w>L', { desc = 'Move Window to Right' })
+
+-- Delete Buffer (Preserves window)
+vim.keymap.set('n', '<leader>bd', ':bdelete<CR>', { desc = 'Delete Current Buffer' })
+vim.keymap.set('n', '<leader>bk', ':bwipeout<CR>', { desc = 'Kill (Wipeout) Buffer' })
+
+-- Create a Scratch Buffer
+vim.keymap.set('n', '<leader>bs', function()
+  local bufname = vim.fn.input 'Scratch Buffer Name: '
+  vim.api.nvim_command 'enew'
+  if bufname and bufname ~= '' then
+    vim.api.nvim_buf_set_name(0, bufname)
+  end
+end, { desc = 'New Scratch Buffer' })
+
+-- Navigate Buffers
+vim.keymap.set('n', '<leader>bn', ':bnext<CR>', { desc = 'Next Buffer' })
+vim.keymap.set('n', '<leader>bp', ':bprevious<CR>', { desc = 'Previous Buffer' })
+
+-- Open Buffer in Split
+vim.keymap.set('n', '<leader>bv', function()
+  vim.cmd 'vsplit' -- Open a vertical split
+  vim.cmd 'enew' -- Create a new buffer (scratch buffer)
+end, { desc = 'Open New Scratch Buffer in Vertical Split' })
+
+vim.keymap.set('n', '<leader>bh', function()
+  vim.cmd 'split' -- Open a horizontal split
+  vim.cmd 'enew' -- Create a new buffer (scratch buffer)
+end, { desc = 'Open New Scratch Buffer in Horizontal Split' })
+
+-- Close All Other Buffers
+vim.keymap.set('n', '<leader>bo', ':%bd|e#|bd#<CR>', { desc = 'Close All Buffers Except Current' })
+
+-- Reveal Startup screen
+vim.keymap.set('n', '<leader>S', ':Startup display<CR>', { desc = 'Display [S]tartup screen' })
+
 --  See `:help lua-guide-autocommands`
 
 -- Highlight when yanking (copying) text
@@ -47,5 +99,7 @@ vim.api.nvim_create_autocmd('TextYankPost', {
     vim.highlight.on_yank()
   end,
 })
+
+vim.keymap.set('n', '<leader>aa', '<cmd>Startup display<CR>', { desc = 'Display the Startup screen' })
 
 -- vim: ts=2 sts=2 sw=2 et
