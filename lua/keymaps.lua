@@ -53,6 +53,11 @@ vim.keymap.set('n', '<leader>wJ', '<C-w>J', { desc = 'Move Window to Bottom' })
 vim.keymap.set('n', '<leader>wK', '<C-w>K', { desc = 'Move Window to Top' })
 vim.keymap.set('n', '<leader>wL', '<C-w>L', { desc = 'Move Window to Right' })
 
+-- Save Buffer
+vim.keymap.set('n', '<D-s>', ':w<CR>', { silent = false })
+vim.keymap.set('i', '<D-s>', '<Esc>:w<CR>a', { silent = false })
+vim.keymap.set('v', '<D-s>', '<Esc>:w<CR>gv', { silent = false })
+
 -- Delete Buffer (Preserves window)
 vim.keymap.set('n', '<leader>bd', ':bdelete<CR>', { desc = 'Delete Current Buffer' })
 vim.keymap.set('n', '<leader>bk', ':bwipeout<CR>', { desc = 'Kill (Wipeout) Buffer' })
