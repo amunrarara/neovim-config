@@ -34,6 +34,19 @@ vim.keymap.set('n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right win
 vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
 vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
 
+-- Function to toggle comment in normal mode
+vim.keymap.set('n', '<C-/>', function()
+  vim.cmd 'normal! gcc'
+end, { noremap = true, silent = true })
+
+-- Function to toggle comment in visual mode
+vim.keymap.set('v', '<C-/>', function()
+  vim.cmd 'normal! gc'
+end, { noremap = true, silent = true })
+
+vim.api.nvim_set_keymap('n', '<D-/>', 'gcc', { noremap = false, silent = true })
+vim.api.nvim_set_keymap('v', '<D-/>', 'gb', { noremap = false, silent = true })
+
 -- Window Management
 vim.keymap.set('n', '<leader>ws', ':split<CR>', { desc = 'Split Window Horizontally' })
 vim.keymap.set('n', '<leader>wv', ':vsplit<CR>', { desc = 'Split Window Vertically' })
@@ -91,7 +104,7 @@ vim.keymap.set('n', '<leader>bo', ':%bd|e#|bd#<CR>', { desc = 'Close All Buffers
 
 -- Reveal Startup screen
 vim.keymap.set('n', '<leader>S', ':Startup display<CR>', { desc = 'Display [S]tartup screen' })
-
+--
 --  See `:help lua-guide-autocommands`
 
 -- Highlight when yanking (copying) text
