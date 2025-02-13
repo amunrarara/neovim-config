@@ -48,7 +48,6 @@ local vibe01 = {
   '                                                ╚╝                   ',
 }
 
-
 local settings = {
   header = {
     type = 'text',
@@ -65,25 +64,6 @@ local settings = {
       disable_statuslines = true,
     },
   },
-  -- shortcuts = {
-  --   type = 'mapping',
-  --   align = 'center',
-  --   title = 'Shortcuts',
-  --   content = {
-  --     { '  Find File', 'Telescope find_files', '<leader>ff' },
-  --     { '  Browse Files', 'Telescope file_browser', '<leader>fb' },
-  --     { '  Recent Files', 'Telescope oldfiles', '<leader>fr' },
-  --     { '  Open Terminal', ':term', '<leader>tt' },
-  --   },
-  --   highlight = 'Function',
-  --   options = { -- ✅ Include options here as well
-  --     mapping_keys = true,
-  --     cursor_column = 0.5,
-  --     empty_lines_between_mappings = true,
-  --     paddings = { 2, 2 },
-  --     disable_statuslines = true,
-  --   },
-  -- },
   colors = {
     background = '#1f2227',
     folded_section = '#56b6c2',
