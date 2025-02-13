@@ -27,7 +27,7 @@ return {
         leave_dirs_open = true,
       },
       window = {
-        position = 'float',
+        position = 'right',
         mappings = {
           ['\\'] = 'close_window',
         },
