@@ -1,8 +1,15 @@
--- startup.nvim - https://github.com/max397574/startup.nvim
 return {
   'startup-nvim/startup.nvim',
-  dependencies = { 'nvim-telescope/telescope.nvim', 'nvim-lua/plenary.nvim', 'nvim-telescope/telescope-file-browser.nvim' },
-  config = function()
-    require('startup').setup(require 'startup.themes.aceaspades_theme')
+  dependencies = { 'nvim-telescope/telescope.nvim', 'nvim-lua/plenary.nvim' },
+  opts = function()
+    local theme = require 'startup.themes.aceaspades_theme'
+    return vim.tbl_deep_extend('force', theme, {
+      options = {
+        disable_statuslines = true,
+        after = function()
+          vim.cmd 'stopinsert' -- Start in Normal mode
+        end,
+      },
+    })
   end,
 }

@@ -1,4 +1,4 @@
 return {
   'natecraddock/sessions.nvim',
-  opts = {},
+  opts = { events = { 'WinEnter' }, session_filepath = vim.fn.stdpath 'data' .. '/sessions', absolute = true },
 }

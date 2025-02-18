@@ -1,4 +1,4 @@
--- [[ Basic Keymaps ]]
+-- [[ Basic Keymaps ]]ke
 --  See `:help vim.keymap.set()`
 
 -- Set highlight on search, but clear on pressing <Esc> in normal mode
@@ -20,7 +20,8 @@ vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' }
 -- Terminal Session
 vim.api.nvim_set_keymap('n', '<leader>tt', ':term<CR>', { noremap = true, silent = true, desc = 'Open [T]erminal' })
 vim.api.nvim_set_keymap('n', '<leader>tv', ':vsp | term<CR>', { noremap = true, silent = true, desc = 'Open Terminal [V]ertical Split' })
-vim.api.nvim_set_keymap('n', '<leader>ts', ':sp | term<CR>', { noremap = true, silent = true, desc = 'Open Terminal - Horizontal [S]plit' })
+vim.api.nvim_set_keymap('n', '<leader>th', ':sp | term<CR>', { noremap = true, silent = true, desc = 'Open Terminal - Horizontal [S]plit' })
+vim.api.nvim_set_keymap('n', '<leader>t2', ':sp | term<CR>:vsp | term<CR>', { noremap = true, silent = true, desc = 'Open [2] Terminals (Horizontally)' })
 
 -- Open floating terminal window
 
@@ -103,6 +104,20 @@ local function toggle_floating_terminal()
   floating_term.win = vim.api.nvim_open_win(floating_term.buf, true, opts)
 end
 
+-- Update floating terminal cwd when Neovim's cwd changes
+
+vim.api.nvim_create_autocmd('DirChanged', {
+  callback = function()
+    if floating_term.buf and vim.api.nvim_buf_is_valid(floating_term.buf) then
+      local chan_id = vim.b[floating_term.buf].terminal_job_id
+      if chan_id and chan_id > 0 then
+        local new_cwd = vim.fn.getcwd()
+        vim.api.nvim_chan_send(chan_id, 'cd ' .. new_cwd .. '\n')
+      end
+    end
+  end,
+})
+
 -- Map the function to a keybinding
 vim.keymap.set('n', '<leader>tf', toggle_floating_terminal, { noremap = true, silent = true, desc = 'Open [F]loating Terminal Window' })
 vim.keymap.set('n', '<C-\\>', toggle_floating_terminal, { noremap = true, silent = true, desc = 'Open Floating Terminal Window' })
@@ -136,7 +151,7 @@ vim.api.nvim_set_keymap('n', '<D-/>', 'gcc', { noremap = false, silent = true })
 vim.api.nvim_set_keymap('v', '<D-/>', 'gb', { noremap = false, silent = true })
 
 -- Window Management
-vim.keymap.set('n', '<leader>ws', ':split<CR>', { desc = 'Split Window Horizontally' })
+vim.keymap.set('n', '<leader>wh', ':split<CR>', { desc = 'Split Window Horizontally' })
 vim.keymap.set('n', '<leader>wv', ':vsplit<CR>', { desc = 'Split Window Vertically' })
 vim.keymap.set('n', '<leader>wk', ':close<CR>', { desc = 'Close Current Window' })
 vim.keymap.set('n', '<leader>wo', ':only<CR>', { desc = 'Close All Other Windows' })
@@ -161,7 +176,7 @@ vim.keymap.set('v', '<D-s>', '<Esc>:w<CR>gv', { silent = false, desc = '[S]ave B
 
 -- Delete Buffer (Preserves window)
 vim.keymap.set('n', '<leader>bd', ':bdelete<CR>', { desc = 'Delete Current Buffer' })
-vim.keymap.set('n', '<leader>bk', ':bwipeout<CR>', { desc = 'Kill (Wipeout) Buffer' })
+vim.keymap.set('n', '<leader>bk', ':bwipeout!<CR>', { desc = 'Kill (Wipeout) Buffer' })
 
 -- Create a Scratch Buffer
 vim.keymap.set('n', '<leader>bs', function()
@@ -206,6 +221,79 @@ vim.api.nvim_create_autocmd('TextYankPost', {
   end,
 })
 
+-- Start-up Screen
+--
 vim.keymap.set('n', '<leader>aa', '<cmd>Startup display<CR>', { desc = 'Display the Startup screen' })
+
+-- Git Copy Remote URL
+
+local function get_git_remote_url()
+  local handle = io.popen 'git remote get-url origin 2>/dev/null'
+  if handle then
+    local result = handle:read('*a'):gsub('\n', '')
+    handle:close()
+    if result:find 'git@' then
+      result = result:gsub('git@', 'https://')
+      result = result:gsub(':', '/')
+    end
+    return result:gsub('%.git$', '')
+  end
+  return nil
+end
+
+local function get_git_relative_path()
+  local handle = io.popen 'git rev-parse --show-prefix'
+  if handle then
+    local result = handle:read('*a'):gsub('\n', '')
+    handle:close()
+    return result .. vim.fn.expand '%'
+  end
+  return vim.fn.expand '%'
+end
+
+local function get_commit_hash()
+  local handle = io.popen('git log -n 1 --pretty=format:%H -- ' .. vim.fn.shellescape(vim.fn.expand '%'))
+  if handle then
+    local result = handle:read('*a'):gsub('\n', '')
+    handle:close()
+    return result
+  end
+  return nil
+end
+
+_G.copy_commit_git_url = function()
+  local remote_url = get_git_remote_url()
+  if not remote_url then
+    print 'Not a git repository or no remote set'
+    return
+  end
+
+  local file_path = get_git_relative_path()
+  local commit_hash = get_commit_hash()
+  local line = vim.fn.line '.'
+
+  if not commit_hash then
+    print 'Could not determine commit hash'
+    return
+  end
+
+  local full_url = remote_url .. '/blob/' .. commit_hash .. '/' .. file_path .. '#L' .. line
+
+  -- Copy to system clipboard
+  vim.fn.setreg('+', full_url)
+  print('Copied to clipboard: ' .. full_url)
+end
+
+-- Create a command for convenience
+vim.api.nvim_create_user_command('CopyCommitGitUrl', function()
+  _G.copy_commit_git_url()
+end, {})
+
+-- Bind it to a key (e.g., <leader>gy for "Git Yank")
+vim.api.nvim_set_keymap('n', '<leader>gy', ':CopyCommitGitUrl<CR>', { noremap = true, silent = true })
+
+-- Right-click context menu
+-- vim.api.nvim_set_keymap('n', '<RightMouse>', ':CopyCommitGitUrl<CR>', { noremap = true, silent = true })
+-- vim.api.nvim_set_keymap('n', '<RightMouse>', ':CopyGitUrl<CR>', { noremap = true, silent = true })
 
 -- vim: ts=2 sts=2 sw=2 et
