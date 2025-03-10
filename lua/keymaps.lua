@@ -5,6 +5,17 @@
 vim.opt.hlsearch = true
 vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
 
+-- Swap G and gg, and $ and 0 in all relevant modes
+for _, mode in ipairs { 'n', 'v', 'o' } do
+  -- Swap G and gg
+  vim.keymap.set(mode, 'G', 'gg', { noremap = true })
+  vim.keymap.set(mode, 'gg', 'G', { noremap = true })
+
+  -- Swap $ and 0
+  vim.keymap.set(mode, '0', '$', { noremap = true })
+  vim.keymap.set(mode, '$', '0', { noremap = true })
+end
+
 -- Diagnostic keymaps
 vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, { desc = 'Go to previous [D]iagnostic message' })
 vim.keymap.set('n', ']d', vim.diagnostic.goto_next, { desc = 'Go to next [D]iagnostic message' })
@@ -292,6 +303,37 @@ end, {})
 -- Bind it to a key (e.g., <leader>gy for "Git Yank")
 vim.api.nvim_set_keymap('n', '<leader>gy', ':CopyCommitGitUrl<CR>', { noremap = true, silent = true })
 
+-- Switch to hex editor mode and back
+-- Function to toggle hex mode
+local function toggle_hex_mode()
+  local ft = vim.bo.filetype
+
+  if vim.b.hex_mode then
+    -- Restore from hex mode
+    vim.cmd ':%!xxd -r'
+    vim.bo.filetype = vim.b.orig_ft
+    vim.b.hex_mode = false
+    print 'Hex mode: OFF'
+  else
+    -- Save original filetype and switch to hex mode
+    vim.b.orig_ft = ft
+    vim.cmd ':%!xxd'
+    vim.bo.filetype = 'xxd'
+    vim.b.hex_mode = true
+    print 'Hex mode: ON'
+  end
+
+  -- Ensure buffer is marked as modified to prevent accidental data loss
+  vim.bo.modified = true
+end
+
+-- Set the keybinding using nvim_set_keymap
+vim.api.nvim_set_keymap(
+  'n', -- Normal mode
+  '<leader>hm', -- Keybinding with <leader>hm
+  ':lua toggle_hex_mode()<CR>', -- Command to execute
+  { noremap = true, silent = true, desc = 'Toggle hex mode' } -- Options
+)
 -- Right-click context menu
 -- vim.api.nvim_set_keymap('n', '<RightMouse>', ':CopyCommitGitUrl<CR>', { noremap = true, silent = true })
 -- vim.api.nvim_set_keymap('n', '<RightMouse>', ':CopyGitUrl<CR>', { noremap = true, silent = true })
